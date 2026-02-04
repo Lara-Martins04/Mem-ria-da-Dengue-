@@ -90,12 +90,12 @@
         
         <!-- Tela de Menu -->
         <div id="menu-screen" class="flex flex-col items-center justify-center min-h-[60vh] text-center animate-scale-in">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aedes_aegypti.svg/480px-Aedes_aegypti.svg.png" 
-                 alt="Mosquito Aedes" 
+            <img src="https://i.imgur.com/GkRyMZD.png" 
+                 alt="Agentes de Combate" 
                  class="w-48 h-48 mb-6 object-contain drop-shadow-xl animate-pulse" />
             <h2 class="text-4xl md:text-5xl font-bold text-green-800 mb-4">Combata o Mosquito!</h2>
             <p class="text-lg md:text-xl text-green-700 mb-8 max-w-lg">
-                Encontre os pares de cartas para limpar os focos de Dengue. 
+                Encontre os pares de cartas correspondentes!
                 Responda perguntas corretamente para eliminar o mosquito!
             </p>
             <button id="btn-start" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-xl transition-transform hover:scale-105 active:scale-95 ring-4 ring-green-300 cursor-pointer">
@@ -173,7 +173,7 @@
     
     <footer class="py-6 text-center text-green-700/60 text-sm">
         <p>Desenvolvido para conscientização sobre a Dengue.</p>
-        <p>Imagens via Wikimedia Commons.</p>
+        <p>Direitos reservados a UNIRIO.</p>
     </footer>
 
     <!-- Elemento ROOT Oculto para satisfazer o index.tsx e corrigir o erro -->
@@ -184,15 +184,15 @@
         import { GoogleGenAI, Type } from "@google/genai";
 
         // --- CONSTANTS ---
-        const CARD_BACK_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Map-symbol-hospital-01.png/600px-Map-symbol-hospital-01.png";
+        const CARD_BACK_IMAGE = "https://imgur.com/53b9a0c5-96c5-465b-a8a3-fd53869ded17";
 
         const CARD_IMAGES = [
-            { pairId: 1, name: "Aedes Aegypti", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aedes_aegypti.svg/1200px-Aedes_aegypti.svg.png" },
-            { pairId: 2, name: "Pneu Velho", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Tires.jpg/640px-Tires.jpg" },
-            { pairId: 3, name: "Água Parada", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Rain_barrel.jpg/640px-Rain_barrel.jpg" },
-            { pairId: 4, name: "Vaso de Planta", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Flower_pot.jpg/640px-Flower_pot.jpg" },
-            { pairId: 5, name: "Sintoma: Febre", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Fever_thermometer.jpg/640px-Fever_thermometer.jpg" },
-            { pairId: 6, name: "Repelente", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Bug_spray.jpg/640px-Bug_spray.jpg" }
+            { pairId: 1, name: "Aedes Aegypti", imageUrl: "https://agencia.ufc.br/wp-content/uploads/2017/05/170508_aedes_dstq.jpg" },
+            { pairId: 2, name: "Pneu Velho", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrhgReb6O13l2m4j9fXIxv9mpIZeb9dgx_0Q&s" },
+            { pairId: 3, name: "Água Parada", imageUrl: "https://f.i.uol.com.br/fotografia/2024/03/08/170993478065eb88bc08df7_1709934780_3x2_md.jpg" },
+            { pairId: 4, name: "Vaso de Planta", imageUrl: "https://central.to.gov.br/image/10920?w=600&h=370" },
+            { pairId: 5, name: "Sintoma: Febre", imageUrl: "https://media.einstein.br/sites/default/files/styles/card_mobile/public/2025-05/pessoa-sintomas-febre-afere-temperatura-com-termometro.jpg.webp?itok=yk5Mdrge" },
+            { pairId: 6, name: "Repelente", imageUrl: "https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2024/02/repelente-dengue.jpg?w=1200&h=900&crop=1" }
         ];
 
         const FALLBACK_QUESTIONS = [
