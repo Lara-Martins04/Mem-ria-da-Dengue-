@@ -11,77 +11,59 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Custom Styles -->
-    <style>
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: #f0fdf4; /* green-50 */
-            user-select: none;
-        }
-
-        /* 3D Flip Animation Utilities */
-        .perspective-1000 {
-            perspective: 1000px;
-        }
-        .transform-style-3d {
-            transform-style: preserve-3d;
-        }
-        .backface-hidden {
-            backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
-        
-        /* Card Flip Class */
-        .card-inner {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            width: 100%;
-            height: 100%;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-
-        /* Animations */
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .animate-scale-in {
-            animation: scaleIn 0.3s ease-out forwards;
-        }
-
-        @keyframes pulseSlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .animate-pulse-slow {
-            animation: pulseSlow 3s infinite;
-        }
-
-        /* Background Pattern for Card Back */
-        .pattern-bg {
-            background-image: radial-gradient(#ff0000 1px, transparent 1px);
-            background-size: 10px 10px;
-        }
-    </style>
-
-    <!-- Import Map for Gemini SDK -->
+    <!-- Import Map para Google GenAI e React (para evitar erros de importação do ambiente) -->
     <script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@^0.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
+    "react/jsx-runtime": "https://esm.sh/react@^19.2.4/jsx-runtime",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
+    "react/": "https://esm.sh/react@^19.2.4/"
   }
 }
 </script>
+
+    <style>
+      body {
+        font-family: 'Fredoka', sans-serif;
+        background-color: #f0fdf4; /* green-50 */
+        user-select: none;
+      }
+      
+      /* Utilitários 3D para o efeito de virar a carta */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      .transform-style-3d {
+        transform-style: preserve-3d;
+      }
+      .backface-hidden {
+        backface-visibility: hidden;
+      }
+      .rotate-y-180 {
+        transform: rotateY(180deg);
+      }
+      .card-inner {
+        transition: transform 0.5s;
+      }
+      
+      /* Padrão de fundo das cartas */
+      .pattern-bg {
+        background-image: radial-gradient(#ff0000 1px, transparent 1px);
+        background-size: 10px 10px;
+      }
+
+      /* Animações */
+      @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      .animate-scale-in {
+        animation: scaleIn 0.3s ease-out forwards;
+      }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col text-gray-800">
 
@@ -90,10 +72,10 @@
         <div class="container mx-auto flex justify-between items-center max-w-4xl">
             <div class="flex items-center space-x-2">
                 <span class="text-3xl">🚫🦟</span>
-                <h1 className="text-xl sm:text-2xl font-bold hidden sm:block">Dengue Memory Quest</h1>
+                <h1 class="text-xl sm:text-2xl font-bold hidden sm:block">Dengue Memory Quest</h1>
             </div>
             
-            <div id="stats-container" class="flex space-x-6 text-sm sm:text-base font-semibold hidden">
+            <div id="game-stats" class="hidden flex space-x-6 text-sm sm:text-base font-semibold">
                 <div class="bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
                     Jogadas: <span id="moves-count">0</span>
                 </div>
@@ -106,120 +88,102 @@
 
     <main class="container mx-auto px-4 py-8 max-w-4xl flex-grow relative">
         
-        <!-- MENU SCREEN -->
-        <div id="menu-screen" class="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aedes_aegypti.svg/480px-Aedes_aegypti.svg.png" 
-              alt="Mosquito Aedes" 
-              class="w-48 h-48 mb-6 object-contain drop-shadow-xl animate-pulse-slow"
-            />
+        <!-- Tela de Menu -->
+        <div id="menu-screen" class="flex flex-col items-center justify-center min-h-[60vh] text-center animate-scale-in">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aedes_aegypti.svg/480px-Aedes_aegypti.svg.png" 
+                 alt="Mosquito Aedes" 
+                 class="w-48 h-48 mb-6 object-contain drop-shadow-xl animate-pulse" />
             <h2 class="text-4xl md:text-5xl font-bold text-green-800 mb-4">Combata o Mosquito!</h2>
             <p class="text-lg md:text-xl text-green-700 mb-8 max-w-lg">
-              Encontre os pares de cartas para limpar os focos de Dengue. 
-              Responda perguntas corretamente para eliminar o mosquito!
+                Encontre os pares de cartas para limpar os focos de Dengue. 
+                Responda perguntas corretamente para eliminar o mosquito!
             </p>
-            <button 
-              id="start-btn"
-              class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-xl transition-transform hover:scale-105 active:scale-95 ring-4 ring-green-300 cursor-pointer"
-            >
-              Começar Jogo
+            <button id="btn-start" class="bg-green-600 hover:bg-green-700 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-xl transition-transform hover:scale-105 active:scale-95 ring-4 ring-green-300 cursor-pointer">
+                Começar Jogo
             </button>
         </div>
 
-        <!-- GAME GRID -->
+        <!-- Grid do Jogo -->
         <div id="game-screen" class="hidden">
-            <div id="grid-container" class="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-6 mt-4">
-                <!-- Cards will be injected here -->
+            <div id="game-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-6 mt-4">
+                <!-- Cartas serão geradas aqui via JS -->
+            </div>
+        </div>
+
+        <!-- Tela de Game Over -->
+        <div id="game-over-screen" class="hidden fixed inset-0 bg-green-900/90 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border-8 border-green-400 animate-scale-in">
+                <span class="text-6xl mb-4 block">🏆</span>
+                <h2 class="text-3xl font-bold text-green-800 mb-2">Parabéns!</h2>
+                <p class="text-gray-600 mb-6 text-lg">Você eliminou todos os focos da Dengue!</p>
+                
+                <div class="bg-green-100 rounded-xl p-4 mb-8">
+                    <p class="text-2xl font-bold text-green-800"><span id="final-score">0</span> Pontos</p>
+                    <p class="text-sm text-green-600">em <span id="final-moves">0</span> jogadas</p>
+                </div>
+
+                <button id="btn-restart" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 rounded-xl shadow-lg transition-transform hover:scale-105">
+                    Jogar Novamente
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+            <div class="bg-white p-6 rounded-xl flex flex-col items-center shadow-2xl">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-green-600 mb-4"></div>
+                <p class="text-lg font-bold text-gray-700">O Mosquito está tentando fugir...</p>
+                <p class="text-sm text-gray-500">Preparando pergunta...</p>
+            </div>
+        </div>
+
+        <!-- Quiz Modal -->
+        <div id="quiz-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-scale-in relative">
+                <!-- Header Modal -->
+                <div class="bg-yellow-400 p-6 flex flex-col items-center">
+                    <span class="text-5xl mb-2">🦟</span>
+                    <h2 class="text-2xl font-bold text-yellow-900 text-center">Desafio da Dengue!</h2>
+                    <p class="text-yellow-800 text-sm font-semibold mt-1">Responda corretamente para garantir o par!</p>
+                </div>
+                <!-- Content Modal -->
+                <div class="p-8">
+                    <p id="quiz-question-text" class="text-xl text-gray-800 font-medium text-center mb-8 leading-relaxed">
+                        Carregando pergunta...
+                    </p>
+
+                    <div id="quiz-buttons" class="grid grid-cols-2 gap-4">
+                        <button id="btn-true" class="py-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-xl transition-all active:scale-95 shadow-lg border-b-4 border-green-700">
+                            VERDADEIRO
+                        </button>
+                        <button id="btn-false" class="py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xl transition-all active:scale-95 shadow-lg border-b-4 border-red-700">
+                            FALSO
+                        </button>
+                    </div>
+
+                    <div id="quiz-feedback" class="hidden text-center p-4 rounded-xl border-2">
+                        <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+                        <p id="feedback-text" class="text-md leading-relaxed"></p>
+                    </div>
+                </div>
             </div>
         </div>
 
     </main>
-
-    <!-- LOADING OVERLAY -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm hidden">
-        <div class="bg-white p-6 rounded-xl flex flex-col items-center shadow-2xl">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-green-600 mb-4"></div>
-            <p class="text-lg font-bold text-gray-700">O Mosquito está tentando fugir...</p>
-            <p class="text-sm text-gray-500">Preparando pergunta...</p>
-        </div>
-    </div>
-
-    <!-- QUIZ MODAL -->
-    <div id="quiz-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-scale-in relative">
-            
-            <!-- Header -->
-            <div class="bg-yellow-400 p-6 flex flex-col items-center">
-                <span class="text-5xl mb-2">🦟</span>
-                <h2 class="text-2xl font-bold text-yellow-900 text-center">Desafio da Dengue!</h2>
-                <p class="text-yellow-800 text-sm font-semibold mt-1">Responda corretamente para garantir o par!</p>
-            </div>
-
-            <!-- Content -->
-            <div class="p-8">
-                <p id="question-text" class="text-xl text-gray-800 font-medium text-center mb-8 leading-relaxed">
-                    Carregando pergunta...
-                </p>
-
-                <!-- Choices -->
-                <div id="quiz-choices" class="grid grid-cols-2 gap-4">
-                    <button id="btn-true" class="py-4 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-xl transition-all active:scale-95 shadow-lg border-b-4 border-green-700">
-                        VERDADEIRO
-                    </button>
-                    <button id="btn-false" class="py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xl transition-all active:scale-95 shadow-lg border-b-4 border-red-700">
-                        FALSO
-                    </button>
-                </div>
-
-                <!-- Feedback -->
-                <div id="quiz-feedback" class="hidden text-center p-4 rounded-xl border-2">
-                    <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
-                    <p id="feedback-explanation" class="text-md leading-relaxed"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- GAME OVER OVERLAY -->
-    <div id="game-over-screen" class="fixed inset-0 bg-green-900/90 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border-8 border-green-400 animate-scale-in">
-            <span class="text-6xl mb-4 block">🏆</span>
-            <h2 class="text-3xl font-bold text-green-800 mb-2">Parabéns!</h2>
-            <p class="text-gray-600 mb-6 text-lg">Você eliminou todos os focos da Dengue!</p>
-            
-            <div class="bg-green-100 rounded-xl p-4 mb-8">
-                <p class="text-2xl font-bold text-green-800"><span id="final-score">0</span> Pontos</p>
-                <p class="text-sm text-green-600">em <span id="final-moves">0</span> jogadas</p>
-            </div>
-
-            <button 
-              id="restart-btn"
-              class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 rounded-xl shadow-lg transition-transform hover:scale-105"
-            >
-              Jogar Novamente
-            </button>
-        </div>
-    </div>
-
-    <!-- Footer -->
+    
     <footer class="py-6 text-center text-green-700/60 text-sm">
         <p>Desenvolvido para conscientização sobre a Dengue.</p>
         <p>Imagens via Wikimedia Commons.</p>
     </footer>
 
-    <!-- Logic -->
+    <!-- Elemento ROOT Oculto para satisfazer o index.tsx e corrigir o erro -->
+    <div id="root" style="display: none;"></div>
+
+    <!-- Lógica do Jogo -->
     <script type="module">
         import { GoogleGenAI, Type } from "@google/genai";
 
-        // ==========================================
-        // CONFIGURATION & CONSTANTS
-        // ==========================================
-        
-        // NOTE: In a real environment, this comes from process.env.API_KEY.
-        // For this single file demo, if you have a key, put it here. 
-        // If left empty, the game uses the fallback questions automatically.
-        const API_KEY = ""; 
-
+        // --- CONSTANTS ---
         const CARD_BACK_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Map-symbol-hospital-01.png/600px-Map-symbol-hospital-01.png";
 
         const CARD_IMAGES = [
@@ -232,111 +196,67 @@
         ];
 
         const FALLBACK_QUESTIONS = [
-          // Ciclo de Vida
-          {
-            text: "Ovos do Aedes aegypti morrem imediatamente se o local secar.",
-            isTrue: false,
-            explanation: "Falso! Os ovos podem resistir por mais de um ano no seco, esperando a água voltar."
-          },
-          {
-            text: "Do ovo até virar mosquito adulto leva apenas 7 a 10 dias no calor.",
-            isTrue: true,
-            explanation: "Verdadeiro! O ciclo é muito rápido, por isso precisamos verificar a casa toda semana."
-          },
-          {
-            text: "A larva do mosquito consegue viver fora da água, na terra úmida.",
-            isTrue: false,
-            explanation: "Falso! A larva é aquática. Se jogarmos a água na terra seca ou no cimento quente, ela morre."
-          },
-          // Transmissão
-          {
-            text: "O mosquito da dengue costuma picar mais durante a noite e madrugada.",
-            isTrue: false,
-            explanation: "Falso! Ele tem hábitos diurnos: pica principalmente no início da manhã e final da tarde."
-          },
-          {
-            text: "Apenas a fêmea do mosquito pica, pois precisa de sangue para os ovos.",
-            isTrue: true,
-            explanation: "Verdadeiro! O macho se alimenta apenas de néctar e sucos de plantas."
-          },
-          {
-            text: "A dengue pode ser transmitida pelo espirro ou compartilhando copos.",
-            isTrue: false,
-            explanation: "Falso! A transmissão é exclusiva pela picada do mosquito infectado."
-          },
-          // Proliferação
-          {
-            text: "Colocar areia nos pratinhos de plantas ajuda a combater a dengue.",
-            isTrue: true,
-            explanation: "Verdadeiro! A areia elimina a água parada onde o mosquito colocaria os ovos."
-          },
-          {
-            text: "O mosquito prefere colocar ovos em água muito suja e poluída de esgoto.",
-            isTrue: false,
-            explanation: "Falso! O Aedes aegypti prefere água limpa e parada, como a de chuva em pneus e garrafas."
-          },
-          {
-            text: "Basta trocar a água do cachorro todo dia, não precisa lavar o pote.",
-            isTrue: false,
-            explanation: "Falso! Tem que esfregar com bucha, pois os ovos ficam grudados na parede do pote."
-          },
-          // Sintomas
-          {
-            text: "Dor forte atrás dos olhos é um sintoma muito comum da dengue.",
-            isTrue: true,
-            explanation: "Verdadeiro! Essa dor (retro-orbital) é uma das características que diferencia da gripe."
-          },
-          {
-            text: "Manchas vermelhas na pele podem aparecer em quem tem dengue.",
-            isTrue: true,
-            explanation: "Verdadeiro! Chamamos isso de exantema, e pode vir acompanhado de coceira."
-          },
-          {
-            text: "A dengue sempre causa nariz escorrendo e muita tosse com catarro.",
-            isTrue: false,
-            explanation: "Falso! Sintomas respiratórios são raros na dengue. Isso é mais comum em gripe ou Covid."
-          }
+            { text: "Ovos do Aedes aegypti morrem imediatamente se o local secar.", isTrue: false, explanation: "Falso! Os ovos podem resistir por mais de um ano no seco, esperando a água voltar." },
+            { text: "Do ovo até virar mosquito adulto leva apenas 7 a 10 dias no calor.", isTrue: true, explanation: "Verdadeiro! O ciclo é muito rápido, por isso precisamos verificar a casa toda semana." },
+            { text: "A larva do mosquito consegue viver fora da água, na terra úmida.", isTrue: false, explanation: "Falso! A larva é aquática. Se jogarmos a água na terra seca ou no cimento quente, ela morre." },
+            { text: "O mosquito da dengue costuma picar mais durante a noite e madrugada.", isTrue: false, explanation: "Falso! Ele tem hábitos diurnos: pica principalmente no início da manhã e final da tarde." },
+            { text: "Apenas a fêmea do mosquito pica, pois precisa de sangue para os ovos.", isTrue: true, explanation: "Verdadeiro! O macho se alimenta apenas de néctar e sucos de plantas." },
+            { text: "Colocar areia nos pratinhos de plantas ajuda a combater a dengue.", isTrue: true, explanation: "Verdadeiro! A areia elimina a água parada onde o mosquito colocaria os ovos." },
+            { text: "Dor forte atrás dos olhos é um sintoma muito comum da dengue.", isTrue: true, explanation: "Verdadeiro! Essa dor (retro-orbital) é uma das características que diferencia da gripe." },
+            { text: "Manchas vermelhas na pele podem aparecer em quem tem dengue.", isTrue: true, explanation: "Verdadeiro! Chamamos isso de exantema, e pode vir acompanhado de coceira." }
         ];
 
-        // ==========================================
-        // GEMINI SERVICE
-        // ==========================================
-        
-        let aiClient = null;
-        if (API_KEY) {
-            aiClient = new GoogleGenAI({ apiKey: API_KEY });
-        }
+        const QUIZ_TOPICS = [
+            "Ovo do mosquito: resistência à seca", "Fase de Larva: vive na água e se alimenta de sujeira", 
+            "Tempo do ciclo: ovo vira adulto em 7 a 10 dias", "Tempo de vida do mosquito adulto (30 a 45 dias)", 
+            "Hábito de picada: prefere o dia", "Apenas a fêmea pica", "O macho do Aedes se alimenta de néctar", 
+            "Dengue não passa pelo contato ou beijo", "Voo baixo: o mosquito costuma voar baixo", 
+            "Dor atrás dos olhos", "Manchas vermelhas no corpo (exantema)", "Diferença da gripe: dengue não tem coriza", 
+            "Ovos nas paredes dos recipientes", "Calhas entupidas e lajes", "Ralos pouco usados: precisam de tela", 
+            "Bebedouros de animais: lavar com bucha"
+        ];
 
-        async function generateQuestion() {
-            if (!aiClient) {
-                console.log("Using Fallback Question (No API Key)");
+        // --- STATE ---
+        let cards = [];
+        let flippedCards = [];
+        let moves = 0;
+        let score = 0;
+        let isProcessing = false;
+        let currentQuestion = null;
+
+        // --- DOM ELEMENTS ---
+        const menuScreen = document.getElementById('menu-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameGrid = document.getElementById('game-grid');
+        const gameStats = document.getElementById('game-stats');
+        const movesEl = document.getElementById('moves-count');
+        const scoreEl = document.getElementById('score-count');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalMovesEl = document.getElementById('final-moves');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const quizModal = document.getElementById('quiz-modal');
+        const quizText = document.getElementById('quiz-question-text');
+        const quizButtons = document.getElementById('quiz-buttons');
+        const quizFeedback = document.getElementById('quiz-feedback');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+
+        // --- GEMINI SERVICE ---
+        async function generateDengueQuestion() {
+            // Tenta obter a API key do ambiente global
+            const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : null;
+
+            if (!apiKey) {
+                console.warn("API Key not found. Using fallback questions.");
                 return null;
             }
 
             try {
-                const topics = [
-                    "Ovo do mosquito: resistência à seca (pode esperar a chuva por um ano)",
-                    "Fase de Larva: vive na água e se alimenta de sujeira microscópica",
-                    "Tempo do ciclo: ovo vira adulto em cerca de 7 a 10 dias no calor",
-                    "Pupa: a fase que não se alimenta, apenas respira antes de virar mosquito",
-                    "Tempo de vida do mosquito adulto (vive cerca de 30 a 45 dias)",
-                    "Hábito de picada: prefere o dia (início da manhã e final da tarde)",
-                    "Apenas a fêmea pica (precisa de sangue para os ovos)",
-                    "O macho do Aedes se alimenta de néctar e frutas, não transmite dengue",
-                    "Dengue não passa pelo contato, beijo ou água compartilhada",
-                    "Voo baixo: o mosquito costuma voar baixo (abaixo dos joelhos)",
-                    "Dor atrás dos olhos (retro-orbital) como característica marcante",
-                    "Manchas vermelhas no corpo (exantema) e coceira",
-                    "Diferença da gripe: dengue geralmente não tem coriza (nariz escorrendo)",
-                    "Ovos nas paredes dos recipientes (não boiam na água)",
-                    "Calhas entupidas e lajes como criadouros escondidos",
-                    "Ralos pouco usados: precisam de tela ou água sanitária",
-                    "Bebedouros de animais: lavar com bucha (não basta trocar a água)"
-                ];
-                
-                const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+                const ai = new GoogleGenAI({ apiKey });
+                const randomTopic = QUIZ_TOPICS[Math.floor(Math.random() * QUIZ_TOPICS.length)];
 
-                const response = await aiClient.models.generateContent({
+                const response = await ai.models.generateContent({
                     model: "gemini-3-flash-preview",
                     contents: `
                         Você é um professor de ciências criando um jogo para alunos do 6º ano (11 a 12 anos).
@@ -347,6 +267,7 @@
                         2. NÃO pergunte sobre medicamentos (AAS, Dipirona), tratamento hospitalar ou outras doenças.
                         3. Use linguagem curiosa e desafiadora para crianças de 11 anos.
                         4. A 'explanation' deve explicar o fato científico de forma simples.
+                        Retorne JSON com: text (string), isTrue (boolean), explanation (string).
                     `,
                     config: {
                         responseMimeType: "application/json",
@@ -367,79 +288,48 @@
                 }
                 return null;
             } catch (error) {
-                console.error("Gemini Error:", error);
+                console.error("Gemini API Error:", error);
                 return null;
             }
         }
 
-        // ==========================================
-        // GAME STATE
-        // ==========================================
+        // --- GAME LOGIC ---
 
-        const state = {
-            cards: [],
-            flippedCards: [],
-            moves: 0,
-            score: 0,
-            isLocked: false,
-            currentQuestion: null
+        // Função global para ser chamada pelo onclick do HTML gerado
+        window.handleCardClick = (id) => {
+             if (isProcessing) return;
+
+            const cardIndex = cards.findIndex(c => c.uniqueId === id);
+            if (cardIndex === -1) return;
+            const card = cards[cardIndex];
+
+            // Ignore if already flipped or already matched
+            if (card.isFlipped || card.isMatched) return;
+
+            // Flip logic
+            card.isFlipped = true;
+            document.getElementById(`inner-${id}`).classList.add('rotate-y-180');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                updateStats();
+                isProcessing = true;
+                checkForMatch();
+            }
         };
 
-        // ==========================================
-        // DOM ELEMENTS
-        // ==========================================
-        
-        const els = {
-            menuScreen: document.getElementById('menu-screen'),
-            gameScreen: document.getElementById('game-screen'),
-            gridContainer: document.getElementById('grid-container'),
-            statsContainer: document.getElementById('stats-container'),
-            movesCount: document.getElementById('moves-count'),
-            scoreCount: document.getElementById('score-count'),
-            startBtn: document.getElementById('start-btn'),
-            restartBtn: document.getElementById('restart-btn'),
-            
-            // Overlays
-            loadingOverlay: document.getElementById('loading-overlay'),
-            quizModal: document.getElementById('quiz-modal'),
-            gameOverScreen: document.getElementById('game-over-screen'),
-            
-            // Quiz
-            questionText: document.getElementById('question-text'),
-            quizChoices: document.getElementById('quiz-choices'),
-            btnTrue: document.getElementById('btn-true'),
-            btnFalse: document.getElementById('btn-false'),
-            quizFeedback: document.getElementById('quiz-feedback'),
-            feedbackTitle: document.getElementById('feedback-title'),
-            feedbackExplanation: document.getElementById('feedback-explanation'),
-
-            // Game Over
-            finalScore: document.getElementById('final-score'),
-            finalMoves: document.getElementById('final-moves')
-        };
-
-        // ==========================================
-        // GAME LOGIC
-        // ==========================================
+        function initGame() {
+            document.getElementById('btn-start').addEventListener('click', startGame);
+            document.getElementById('btn-restart').addEventListener('click', startGame);
+            document.getElementById('btn-true').addEventListener('click', () => handleQuizAnswer(true));
+            document.getElementById('btn-false').addEventListener('click', () => handleQuizAnswer(false));
+        }
 
         function startGame() {
-            // Reset state
-            state.moves = 0;
-            state.score = 0;
-            state.flippedCards = [];
-            state.isLocked = false;
-            
-            // Update UI
-            els.movesCount.textContent = 0;
-            els.scoreCount.textContent = 0;
-            els.menuScreen.classList.add('hidden');
-            els.gameOverScreen.classList.add('hidden');
-            els.gameScreen.classList.remove('hidden');
-            els.statsContainer.classList.remove('hidden');
-
-            // Create Deck
+            // Reset State
             const pairs = [...CARD_IMAGES, ...CARD_IMAGES];
-            const shuffled = pairs
+            cards = pairs
                 .sort(() => Math.random() - 0.5)
                 .map((item, index) => ({
                     ...item,
@@ -448,191 +338,182 @@
                     isMatched: false
                 }));
             
-            state.cards = shuffled;
+            flippedCards = [];
+            moves = 0;
+            score = 0;
+            isProcessing = false;
+
+            // Update UI
+            updateStats();
             renderGrid();
+            
+            menuScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameStats.classList.remove('hidden');
+        }
+
+        function updateStats() {
+            movesEl.textContent = moves;
+            scoreEl.textContent = score;
         }
 
         function renderGrid() {
-            els.gridContainer.innerHTML = '';
-            state.cards.forEach(card => {
+            gameGrid.innerHTML = '';
+            cards.forEach(card => {
                 const cardEl = document.createElement('div');
-                cardEl.className = `group relative w-full aspect-[3/4] cursor-pointer perspective-1000 card ${card.isMatched ? 'invisible' : ''}`;
-                cardEl.id = card.uniqueId;
-                cardEl.onclick = () => handleCardClick(card.uniqueId);
+                
+                // Base classes
+                let classes = "group relative w-full aspect-[3/4] perspective-1000 ";
+                
+                // Cursor logic based on isMatched
+                if (card.isMatched) {
+                    classes += "cursor-default";
+                } else {
+                    classes += "cursor-pointer";
+                }
 
-                // Determine if flip class is needed (though mainly handled by JS toggling class on click)
-                const isFlippedClass = card.isFlipped ? 'flipped' : '';
+                cardEl.className = classes;
+                // Usando window.handleCardClick para garantir escopo
+                cardEl.setAttribute('onclick', `window.handleCardClick('${card.uniqueId}')`);
+                
+                // Rotation logic: Flipped OR Matched (both stay face up)
+                const isFaceUp = card.isFlipped || card.isMatched;
+                const rotationClass = isFaceUp ? 'rotate-y-180' : '';
 
+                // HTML Structure of the card
                 cardEl.innerHTML = `
-                    <div class="card-inner duration-500 transform-style-3d relative w-full h-full shadow-lg rounded-xl ${isFlippedClass}">
-                        <!-- FRONT (Actually the Back of card design) -->
+                    <div id="inner-${card.uniqueId}" class="card-inner duration-500 transform-style-3d relative w-full h-full shadow-lg rounded-xl ${rotationClass}">
+                        <!-- FRONT (Verso - Logotipo) -->
                         <div class="absolute w-full h-full backface-hidden bg-white border-4 border-red-500 rounded-xl flex items-center justify-center p-4 overflow-hidden">
-                             <div class="absolute inset-0 bg-red-50 opacity-10 pattern-bg"></div>
-                             <div class="flex flex-col items-center justify-center opacity-80 z-10">
-                                 <img src="${CARD_BACK_IMAGE}" alt="Verso" class="w-16 h-16 mb-2" />
-                                 <span class="text-red-600 font-bold text-sm text-center">Combata a Dengue</span>
-                             </div>
+                            <div class="absolute inset-0 bg-red-50 opacity-10 pattern-bg"></div>
+                            <div class="flex flex-col items-center justify-center opacity-80 z-10">
+                                <img src="${CARD_BACK_IMAGE}" alt="Verso" class="w-16 h-16 mb-2" />
+                                <span class="text-red-600 font-bold text-sm text-center">Combata a Dengue</span>
+                            </div>
                         </div>
-
-                        <!-- BACK (The Image) -->
+                        <!-- BACK (Frente - Imagem do par) -->
                         <div class="absolute w-full h-full backface-hidden bg-white border-4 border-green-500 rounded-xl flex flex-col items-center justify-center p-2 rotate-y-180">
-                           <img src="${card.imageUrl}" alt="${card.name}" class="w-full h-24 object-contain mb-2 rounded-md" />
-                           <span class="text-green-800 font-bold text-xs sm:text-sm text-center leading-tight">${card.name}</span>
+                            <img src="${card.imageUrl}" alt="${card.name}" class="w-full h-24 object-contain mb-2 rounded-md" />
+                            <span class="text-green-800 font-bold text-xs sm:text-sm text-center leading-tight">
+                                ${card.name}
+                            </span>
                         </div>
                     </div>
                 `;
-                els.gridContainer.appendChild(cardEl);
+                gameGrid.appendChild(cardEl);
             });
         }
 
-        function handleCardClick(id) {
-            if (state.isLocked) return;
-            
-            const cardIndex = state.cards.findIndex(c => c.uniqueId === id);
-            const card = state.cards[cardIndex];
-
-            // Ignore if already flipped or matched
-            if (card.isFlipped || card.isMatched) return;
-
-            // Flip Logic
-            card.isFlipped = true;
-            document.getElementById(id).classList.add('flipped');
-            state.flippedCards.push(card);
-
-            if (state.flippedCards.length === 2) {
-                // Increment moves
-                state.moves++;
-                els.movesCount.textContent = state.moves;
-                state.isLocked = true; // Prevent other clicks
-                checkForMatch();
-            }
-        }
-
         async function checkForMatch() {
-            const [card1, card2] = state.flippedCards;
-            const match = card1.pairId === card2.pairId;
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.pairId === card2.pairId;
 
-            if (match) {
-                // Show Loading
-                els.loadingOverlay.classList.remove('hidden');
-
-                // Get Question
-                let question = await generateQuestion();
+            if (isMatch) {
+                // Match Found: Trigger Quiz
+                loadingOverlay.classList.remove('hidden');
+                
+                let question = await generateDengueQuestion();
                 if (!question) {
                     const idx = Math.floor(Math.random() * FALLBACK_QUESTIONS.length);
                     question = FALLBACK_QUESTIONS[idx];
                 }
 
-                state.currentQuestion = question;
-                els.loadingOverlay.classList.add('hidden');
-                
-                // Show Quiz
-                openQuizModal(question);
-
+                currentQuestion = question;
+                loadingOverlay.classList.add('hidden');
+                showQuizModal();
             } else {
-                // No match, flip back after delay
+                // No Match
                 setTimeout(() => {
-                    const el1 = document.getElementById(card1.uniqueId);
-                    const el2 = document.getElementById(card2.uniqueId);
-                    
-                    if(el1) el1.classList.remove('flipped');
-                    if(el2) el2.classList.remove('flipped');
-
+                    // Visual unflip
+                    document.getElementById(`inner-${card1.uniqueId}`).classList.remove('rotate-y-180');
+                    document.getElementById(`inner-${card2.uniqueId}`).classList.remove('rotate-y-180');
+                    // Update State
                     card1.isFlipped = false;
                     card2.isFlipped = false;
-                    state.flippedCards = [];
-                    state.isLocked = false;
+                    flippedCards = [];
+                    isProcessing = false;
                 }, 1000);
             }
         }
 
-        // ==========================================
-        // QUIZ LOGIC
-        // ==========================================
-
-        function openQuizModal(question) {
-            els.questionText.textContent = question.text;
+        function showQuizModal() {
+            quizText.textContent = currentQuestion.text;
+            quizButtons.classList.remove('hidden');
+            quizFeedback.classList.add('hidden');
             
-            // Reset modal state
-            els.quizChoices.classList.remove('hidden');
-            els.quizFeedback.classList.add('hidden');
+            // Reset styles
+            quizFeedback.className = "hidden text-center p-4 rounded-xl border-2";
             
-            // Reset button styles
-            els.quizFeedback.className = "hidden text-center p-4 rounded-xl border-2"; // Reset colors
-            
-            els.quizModal.classList.remove('hidden');
+            quizModal.classList.remove('hidden');
         }
 
-        function handleAnswer(choice) {
-            const question = state.currentQuestion;
-            const isCorrect = choice === question.isTrue;
-
-            // Show Result UI
-            els.quizChoices.classList.add('hidden');
-            els.quizFeedback.classList.remove('hidden');
+        function handleQuizAnswer(userChoice) {
+            const isCorrect = userChoice === currentQuestion.isTrue;
+            
+            // Show Feedback
+            quizButtons.classList.add('hidden');
+            quizFeedback.classList.remove('hidden');
             
             if (isCorrect) {
-                els.quizFeedback.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
-                els.feedbackTitle.textContent = "Correto! 🎉";
+                quizFeedback.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
+                quizFeedback.classList.remove('bg-red-100', 'text-red-800', 'border-red-400');
+                feedbackTitle.textContent = "Correto! 🎉";
             } else {
-                els.quizFeedback.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
-                els.feedbackTitle.textContent = "Ops! Errado. 😓";
+                quizFeedback.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
+                quizFeedback.classList.remove('bg-green-100', 'text-green-800', 'border-green-400');
+                feedbackTitle.textContent = "Ops! Errado. 😓";
             }
-            els.feedbackExplanation.textContent = question.explanation;
+            feedbackText.textContent = currentQuestion.explanation;
 
-            // Wait 4.5 seconds so user can read, then proceed
+            // Resolve Match logic after delay to read feedback
             setTimeout(() => {
-                finalizeTurn(isCorrect);
-            }, 4500);
+                quizModal.classList.add('hidden');
+                resolveMatchAttempt(isCorrect);
+            }, 4500); // 4.5s delay like in original App.tsx
         }
 
-        function finalizeTurn(isCorrect) {
-            const [card1, card2] = state.flippedCards;
+        function resolveMatchAttempt(isCorrect) {
+            const [card1, card2] = flippedCards;
 
             if (isCorrect) {
-                // Keep them matched
+                score += 10;
+                // Mark as matched
                 card1.isMatched = true;
                 card2.isMatched = true;
-                state.score += 10;
-                els.scoreCount.textContent = state.score;
-                
-                // Visually hide them or mark them
-                document.getElementById(card1.uniqueId).classList.add('invisible');
-                document.getElementById(card2.uniqueId).classList.add('invisible');
-                
-                checkGameOver();
+                // Ensure they stay flipped visually (handled by re-render or class persistence)
+                // We re-render here to update the 'cursor-default' class and ensure state consistency
+                renderGrid();
             } else {
-                // Flip back (Penalty)
+                // Wrong answer penalty: flip cards back
+                // Visual unflip
+                const el1 = document.getElementById(`inner-${card1.uniqueId}`);
+                const el2 = document.getElementById(`inner-${card2.uniqueId}`);
+                if (el1) el1.classList.remove('rotate-y-180');
+                if (el2) el2.classList.remove('rotate-y-180');
+                
                 card1.isFlipped = false;
                 card2.isFlipped = false;
-                document.getElementById(card1.uniqueId).classList.remove('flipped');
-                document.getElementById(card2.uniqueId).classList.remove('flipped');
             }
 
-            // Cleanup
-            state.flippedCards = [];
-            state.currentQuestion = null;
-            state.isLocked = false;
-            els.quizModal.classList.add('hidden');
+            flippedCards = [];
+            isProcessing = false;
+            updateStats();
+            checkGameOver();
         }
 
         function checkGameOver() {
-            const allMatched = state.cards.every(c => c.isMatched);
-            if (allMatched) {
-                els.finalScore.textContent = state.score;
-                els.finalMoves.textContent = state.moves;
-                els.gameOverScreen.classList.remove('hidden');
+            if (cards.every(c => c.isMatched)) {
+                finalScoreEl.textContent = score;
+                finalMovesEl.textContent = moves;
+                gameScreen.classList.add('hidden');
+                gameStats.classList.add('hidden');
+                gameOverScreen.classList.remove('hidden');
             }
         }
 
-        // ==========================================
-        // EVENTS
-        // ==========================================
-        
-        els.startBtn.addEventListener('click', startGame);
-        els.restartBtn.addEventListener('click', startGame);
-        els.btnTrue.addEventListener('click', () => handleAnswer(true));
-        els.btnFalse.addEventListener('click', () => handleAnswer(false));
+        // Init
+        initGame();
 
     </script>
 </body>
