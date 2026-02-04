@@ -19,8 +19,8 @@
     "react": "https://esm.sh/react@^19.2.4",
     "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
     "react/jsx-runtime": "https://esm.sh/react@^19.2.4/jsx-runtime",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/"
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
   }
 }
 </script>
@@ -223,6 +223,10 @@
         let score = 0;
         let isProcessing = false;
         let currentQuestion = null;
+        
+        // Bags para controle de não repetição
+        let availableTopics = [];
+        let availableFallbackQuestions = [];
 
         // --- DOM ELEMENTS ---
         const menuScreen = document.getElementById('menu-screen');
@@ -254,7 +258,16 @@
 
             try {
                 const ai = new GoogleGenAI({ apiKey });
-                const randomTopic = QUIZ_TOPICS[Math.floor(Math.random() * QUIZ_TOPICS.length)];
+
+                // Lógica de não repetição de tópicos (Reshuffle se vazio)
+                if (availableTopics.length === 0) {
+                    availableTopics = [...QUIZ_TOPICS];
+                }
+                
+                // Escolhe um índice aleatório e remove do array (Splice)
+                const topicIndex = Math.floor(Math.random() * availableTopics.length);
+                const randomTopic = availableTopics[topicIndex];
+                availableTopics.splice(topicIndex, 1);
 
                 const response = await ai.models.generateContent({
                     model: "gemini-3-flash-preview",
@@ -338,6 +351,10 @@
                     isMatched: false
                 }));
             
+            // Inicializa as "bags" com cópias completas das listas
+            availableTopics = [...QUIZ_TOPICS];
+            availableFallbackQuestions = [...FALLBACK_QUESTIONS];
+
             flippedCards = [];
             moves = 0;
             score = 0;
@@ -415,8 +432,13 @@
                 
                 let question = await generateDengueQuestion();
                 if (!question) {
-                    const idx = Math.floor(Math.random() * FALLBACK_QUESTIONS.length);
-                    question = FALLBACK_QUESTIONS[idx];
+                    // Fallback Logic com não repetição
+                    if (availableFallbackQuestions.length === 0) {
+                        availableFallbackQuestions = [...FALLBACK_QUESTIONS];
+                    }
+                    const idx = Math.floor(Math.random() * availableFallbackQuestions.length);
+                    question = availableFallbackQuestions[idx];
+                    availableFallbackQuestions.splice(idx, 1); // Remove usada
                 }
 
                 currentQuestion = question;
